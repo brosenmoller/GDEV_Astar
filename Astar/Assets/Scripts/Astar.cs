@@ -1,7 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+
+public enum PathAlogrithm
+{
+    BruteForce = 0,
+    BruteForceEarlyExit = 1,
+    GreedyBestFirst = 2,
+    AStar = 3,
+}
 
 public class Astar
 {
@@ -13,32 +19,52 @@ public class Astar
     /// <param name="endPos"></param>
     /// <param name="grid"></param>
     /// <returns></returns>
+    /// 
+
     public List<Vector2Int> FindPathToTarget(Vector2Int startPos, Vector2Int endPos, Cell[,] grid)
     {
-        return null;
-    }
-
-    /// <summary>
-    /// This is the Node class you can use this class to store calculated FScores for the cells of the grid, you can leave this as it is
-    /// </summary>
-    public class Node
-    {
-        public Vector2Int position; //Position on the grid
-        public Node parent; //Parent Node of this node
-
-        public float FScore { //GScore + HScore
-            get { return GScore + HScore; }
-        }
-        public float GScore; //Current Travelled Distance
-        public float HScore; //Distance estimated based on Heuristic
-
-        public Node() { }
-        public Node(Vector2Int position, Node parent, int GScore, int HScore)
+        if (endPos.x < 0 || endPos.x >= grid.GetLength(0) || endPos.y < 0 || endPos.y >= grid.GetLength(1))
         {
-            this.position = position;
-            this.parent = parent;
-            this.GScore = GScore;
-            this.HScore = HScore;
+            return null;
         }
+
+        (List<Vector2Int>, PathData) resultData;
+
+        GameManager.Instance.checkedTiles = new List<Vector2Int>();
+
+        switch (GameManager.Instance.currentAlgorithm)
+        {
+            case PathAlogrithm.BruteForce:
+                BruteForcePath bruteForcePath = new BruteForcePath();
+                resultData = bruteForcePath.FindPathToTarget(startPos, endPos, grid);
+                break;
+            case PathAlogrithm.BruteForceEarlyExit:
+                BruteForceEarlyExitPath bruteForceEarlyExitPath = new BruteForceEarlyExitPath();
+                resultData = bruteForceEarlyExitPath.FindPathToTarget(startPos, endPos, grid);
+                break;
+            case PathAlogrithm.GreedyBestFirst:
+                GreedyBestFirstPath bestFirstPath = new GreedyBestFirstPath();
+                resultData = bestFirstPath.FindPathToTarget(startPos, endPos, grid);
+                break;
+            case PathAlogrithm.AStar:
+                AStarPath aStarPath = new AStarPath();
+                resultData = aStarPath.FindPathToTarget(startPos, endPos, grid);
+                break;
+            default: 
+                return null;
+
+        }
+
+        List<Vector2Int> path = resultData.Item1;
+        PathData pathData = resultData.Item2;
+
+        GameManager.Instance.checkedTiles = pathData.checkedTiles;
+
+        Debug.Log(GameManager.Instance.currentAlgorithm.ToString() + 
+            " --- Tiles Searched: " + pathData.checkedTiles.Count.ToString() + 
+            " --- Path Length: " + pathData.pathLength.ToString()
+        );
+
+        return path;
     }
 }

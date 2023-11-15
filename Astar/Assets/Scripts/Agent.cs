@@ -23,10 +23,6 @@ public class Agent : MonoBehaviour
         line.material.color = renderer.material.color;
     }
 
-    private void Start()
-    {
-    }
-
     public void FindPathToTarget(Vector2Int startPos, Vector2Int endPos, Cell[,] grid)
     {
         path = Astar.FindPathToTarget(startPos, endPos, grid);
@@ -51,9 +47,6 @@ public class Agent : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(moveButton))
         {
-            Debug.Log("Click");
-            Ray r = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -10));
-
             Vector3 mousePos = MouseToWorld();
             Vector2Int targetPos = Vector3ToVector2Int(mousePos);
             targetVisual.transform.position = Vector2IntToVector3(targetPos);
